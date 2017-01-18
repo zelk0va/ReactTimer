@@ -24992,11 +24992,6 @@
 	      React.createElement(
 	        'div',
 	        { className: 'column small-centered medium-6 large-4' },
-	        React.createElement(
-	          'p',
-	          null,
-	          'Main.jsx Rendered'
-	        ),
 	        props.children
 	      )
 	    )
@@ -25082,15 +25077,64 @@
 	'use strict';
 
 	var React = __webpack_require__(8);
+	var Clock = __webpack_require__(228);
+	var Controls = __webpack_require__(230);
 
 	var Timer = React.createClass({
 	  displayName: 'Timer',
 
+	  getInitialState: function getInitialState() {
+	    return {
+	      count: 0,
+	      timerStatus: 'stopped'
+	    };
+	  },
+	  componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+	    if (this.state.timerStatus !== prevState.timerStatus) {
+	      switch (this.state.timerStatus) {
+	        case 'started':
+	          this.handleStart();
+	          break;
+	        case 'stopped':
+	          this.setState({ count: 0 });
+	        case 'paused':
+	          clearInterval(this.timer);
+	          this.timer = undefined;
+	          break;
+	      }
+	    }
+	  },
+	  componentWillUnmount: function componentWillUnmount() {
+	    clearInterval(this.timer);
+	  },
+	  handleStart: function handleStart() {
+	    var _this = this;
+
+	    this.timer = setInterval(function () {
+	      _this.setState({
+	        count: _this.state.count + 1
+	      });
+	    }, 1000);
+	  },
+	  handleStatusChange: function handleStatusChange(newTimerStatus) {
+	    this.setState({ timerStatus: newTimerStatus });
+	  },
 	  render: function render() {
+	    var _state = this.state,
+	        count = _state.count,
+	        timerStatus = _state.timerStatus;
+
+
 	    return React.createElement(
-	      'p',
+	      'div',
 	      null,
-	      'derp.jsx'
+	      React.createElement(
+	        'h1',
+	        { className: 'page-title' },
+	        'Timer App'
+	      ),
+	      React.createElement(Clock, { totalSeconds: count }),
+	      React.createElement(Controls, { countdownStatus: timerStatus, onStatusChange: this.handleStatusChange })
 	    );
 	  }
 	});
@@ -25315,7 +25359,7 @@
 	          { className: 'button secondary', onClick: _this2.onStatusChange('paused') },
 	          'Pause'
 	        );
-	      } else if (countdownStatus === 'paused') {
+	      } else {
 	        return React.createElement(
 	          'button',
 	          { className: 'button primary', onClick: _this2.onStatusChange('started') },
